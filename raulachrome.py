@@ -6,7 +6,7 @@ from selenium.webdriver.support import expected_conditions as EC
 
 from selenium.webdriver.common.by import By
 from selenium import webdriver
-import sys,getpass
+import sys,getpass,requests
 from time import sleep
 
 
@@ -53,7 +53,20 @@ url='https://github.com/'+username
 
 #print(url)
 repo=input('Enter a repo name: ')
-url=url+'/'+repo+'/settings'
+url=url+'/'+repo
+
+res=requests.get(url)
+
+if res.status_code!=200:
+    print("No such repo exists in your account")
+    sys.exit()
+ 
+#print(res.status_code)   
+url=url+'/settings'
+
+
+
+
 
 #sleep(2)
 #driver.back()
@@ -96,7 +109,7 @@ else:
 
 driver.execute_script("arguments[0].setAttribute('value','"+repo+"')",textElem)
 
-
+"""
 
 if textElem.is_displayed():
     print("Element is displayed")
@@ -107,14 +120,15 @@ if textElem.is_enabled():
     print("Element is enabled")
 
     #sleep(1)
-   
+"""
+
 try:
     confirmElem=driver.find_element_by_css_selector('form[action="/MayankPratap/'+repo+'/settings/delete"] button[type="submit"]')
     confirmElem.submit()
 except:
     print("Some cool error")
 
-print("Deleted successfully")
+print("Deleted % successfully" % repo)
 sleep(2)
 
 driver.close()
