@@ -8,6 +8,9 @@ from selenium.webdriver.common.by import By
 from selenium import webdriver
 import sys,getpass,requests
 from time import sleep
+import readline
+
+
 
 
 
@@ -51,92 +54,102 @@ while 1:
 
 url='https://github.com/'+username
 
+tempUrl='https://github.com/'+username+'?tab=repositories';
+
+driver.get(tempUrl)
+
+repoNames=driver.find_elements_by_css_selector('a[itemprop="name codeRepository"]')
+
+length=len(repoNames)
+
+names=[]
+
+for i in range(0,length):
+    names.append(str(repoNames[i].text))
+
+for i in range(0,length):
+    print(names[i])
+
+# This is the code for autocomplete based on my repositories    
+
+def complete(text,state):
+    for name in names:
+        if name.startswith(text):
+            if not state:
+                return name
+            else:
+                state-=1
+
+
+readline.parse_and_bind("tab: complete")
+readline.set_completer(complete)
+
+repos=[]
+
+while 1:
+    repo=input('Repo name to be deleted or (no):')
+    if repo=="(no)":
+        break
+    repos.append(repo)
+
 #print(url)
-repo=input('Enter a repo name: ')
-url=url+'/'+repo
+for i in range(0,len(repos)):
 
-res=requests.get(url)
-
-if res.status_code!=200:
-    print("No such repo exists in your account")
-    sys.exit()
- 
+    loopurl=url+'/'+repos[i]
+    #print(str(i)+" "+loopurl)
+    res=requests.get(loopurl)
+    if res.status_code!=200:
+        print("No repo named %s exists in your account" % repos[i])
+        continue
 #print(res.status_code)   
-url=url+'/settings'
+    loopurl=loopurl+'/settings'
+    driver.get(loopurl)
 
-
-
-
-
-#sleep(2)
-#driver.back()
-driver.get(url)
+    #print("Hola")
 
 #WebDriverWait(browser,10000).until(EC.visibility_of_element_located((By.TAG_NAME,'body')))
 
-deleteElem=driver.find_element_by_css_selector("button[data-facebox='#delete_repo_confirm']")
-deleteElem.click()
-"""
-signin_window_handle=None
-
-while not signin_window_handle:
-	for handle in driver.window_handles:
-		print(handle)
-		if handle!=main_window_handle:
-			signin_window_handle=handle
-			break
-
-print("Hola")
-
-driver.switch_to.window(signin_window_handle)
-
-"""
+    deleteElem=driver.find_element_by_css_selector("button[data-facebox='#delete_repo_confirm']")
+    deleteElem.click()
 
 
-textElem=driver.find_element_by_css_selector('form[action="/MayankPratap/'+repo+'/settings/delete"] input[type="text"]')
-#print(textElem.tag_name)
-#print(textElem.get_attribute('type'))
-#print(textElem.get_attribute('class'))
-#print(textElem.get_attribute('aria-label'))
-#print(textElem.location)    
-"""if textElem.is_displayed():
-    print("Element is displayed.")
-else:
-    print("Element is not displayed")
-"""
-# This is the hack!!!! to get repo name inside popup 
-# I have executed javaScript.
 
-driver.execute_script("arguments[0].setAttribute('value','"+repo+"')",textElem)
+    textElem=driver.find_element_by_css_selector('form[action="/MayankPratap/'+repos[i]+'/settings/delete"] input[type="text"]')
 
-"""
+    # This is the hack!!!! to get repo name inside popup  
+    # I have executed javaScript.
 
-if textElem.is_displayed():
-    print("Element is displayed")
-else:
-    print("Element is not displayed")
+    driver.execute_script("arguments[0].setAttribute('value','"+repos[i]+"')",textElem)
+
+    """
+
+    if textElem.is_displayed():
+        print("Element is displayed")
+    else:
+        print("Element is not displayed")
     
-if textElem.is_enabled():
-    print("Element is enabled")
+    if textElem.is_enabled():
+        print("Element is enabled")
 
     #sleep(1)
-"""
+    """
 
-try:
-    confirmElem=driver.find_element_by_css_selector('form[action="/MayankPratap/'+repo+'/settings/delete"] button[type="submit"]')
-    confirmElem.submit()
-except:
-    print("Some cool error")
+    try:
+        confirmElem=driver.find_element_by_css_selector('form[action="/MayankPratap/'+repos[i]+'/settings/delete"] button[type="submit"]')
+        confirmElem.submit()
+    except:
+        print("!!!!!!!!!!error!!!!!!!!")
 
-print("Deleted % successfully" % repo)
-sleep(2)
+    print("Deleted \"%s\" successfully" % repos[i])
+    
+    
 
+
+    #driver.switch_to.window(main_window_handle)
+    #driver.quit()
+    #print("Clicked and submited")
+
+
+print("All undesired repos deleted succesfully")
+sleep(1)
 driver.close()
-
-#driver.switch_to.window(main_window_handle)
-
-
-#driver.quit()
-#print("Clicked and submited")
-
-
