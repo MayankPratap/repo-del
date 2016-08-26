@@ -15,9 +15,9 @@ So I decided to write a python script which will take all my unwanted repository
 
 2) To install dependencies :
    
-    ```bash
-    sh installer.sh
-    ```
+   ```bash
+   sh installer.sh
+   ```
 
 3) Now, You are ready to go,
   
